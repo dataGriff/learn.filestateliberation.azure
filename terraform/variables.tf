@@ -36,13 +36,11 @@ variable "organisation" {
 
 variable "domain" {
   type        = string
-  default     = "platform"
   description = "The is the business problem domain being solved by the resources."
 }
 
 variable "unique_namespace" {
   type        = string
-  default     = "hngc"
   description = "The is the unique namespace added to resources."
 }
 
@@ -52,18 +50,10 @@ locals {
   resource_group_name               = "${local.environment_shortcode}-${var.domain}-rg-${var.unique_namespace}"
   storage_account_name              = "${local.environment_shortcode}${var.domain}sa${local.region_shortcode}${var.unique_namespace}"
   eventhub_namespace_name           = "${local.environment_shortcode}-${var.team}-ehns-${local.region_shortcode}-${var.unique_namespace}"
-  databricks_workspace_name         = "${local.environment_shortcode}-${var.team}-dbw-${local.region_shortcode}-${var.unique_namespace}"
-  databricks_workspace_rg           = "databricks-rg-${local.resource_group_name}"
   databricks_premium_workspace_name = "${local.environment_shortcode}-${var.team}-dbwp-${local.region_shortcode}-${var.unique_namespace}"
   databricks_premium_workspace_rg   = "databricks-premium-rg-${local.resource_group_name}"
-  cosmos_sql_name                   = "${local.environment_shortcode}-${var.domain}-cosdbsql-${local.region_shortcode}-${var.unique_namespace}"
-  cosmos_mon_name                   = "${local.environment_shortcode}-${var.domain}-cosdbmon-${local.region_shortcode}-${var.unique_namespace}"
-  apim_name                         = "${local.environment_shortcode}-${var.organisation}-apim-${local.region_shortcode}-${var.unique_namespace}"
-  acr_name                          = "${local.environment_shortcode}${var.organisation}acr${local.region_shortcode}${var.unique_namespace}"
   key_vault_name                    = "${local.environment_shortcode}-${var.domain}-kv-${local.region_shortcode}-${var.unique_namespace}"
-  data_factory_name                 = "${local.environment_shortcode}-${var.domain}-adf-${local.region_shortcode}-${var.unique_namespace}"
-  cognitive_search_name             = "${local.environment_shortcode}-${var.domain}-cogsrch-${local.region_shortcode}-${var.unique_namespace}"
-
+ 
   tags = {
     environment  = var.environment
     organisation = var.organisation
