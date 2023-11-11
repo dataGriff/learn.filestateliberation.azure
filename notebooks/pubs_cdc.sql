@@ -9,11 +9,11 @@
 
 -- COMMAND ----------
 
-CREATE CATALOG beer;
+CREATE CATALOG IF NOT EXISTS beer;
 
 -- COMMAND ----------
 
-CREATE SCHEMA beer.pub;
+CREATE SCHEMA IF NOT EXISTS beer.pub;
 
 -- COMMAND ----------
 
@@ -43,12 +43,12 @@ SELECT * FROM csv.`abfss://files@lrndatasaeundgrf.dfs.core.windows.net/pubs`;
 
 -- COMMAND ----------
 
-CREATE SCHEMA beer.files;
+CREATE SCHEMA IF NOT EXISTS beer.files;
 
 -- COMMAND ----------
 
-DROP TABLE IF EXISTS beer.files.pub;
-CREATE TABLE beer.files.pub (
+--DROP TABLE IF EXISTS beer.files.pub;
+CREATE TABLE IF NOT EXISTS beer.files.pub (
   pub STRING,
   number_of_beers INT,
   date_updated DATE
@@ -109,25 +109,37 @@ select * from beer.files.pub
 
 -- COMMAND ----------
 
--- MAGIC %py
--- MAGIC change_data_stream = spark.readStream.format("delta") \
--- MAGIC                                      .option("readChangeData", "true") \
--- MAGIC                                      .table("beer.pub.state")
--- MAGIC
--- MAGIC # Apply the merge logic to each batch
--- MAGIC query = change_data_stream.filter("_change_type in ('insert','update_postimage')").writeStream \
--- MAGIC     .format("delta") \
--- MAGIC     .outputMode("append") \
--- MAGIC     .option("checkpointLocation", "lrndatasaeundgrf.dfs.core.windows.net/lake/pubs/history/checkpoint") \
--- MAGIC     .trigger(availableNow=True) \
--- MAGIC     .start("'lrndatasaeundgrf.dfs.core.windows.net/lake/pubs/history'")
+DROP TABLE IF EXISTS beer.pub.history;
+CREATE TABLE IF NOT EXISTS beer.pub.history (
+  pub STRING,
+  number_of_beers INT,
+  date_updated DATE,
+  _change_type STRING,
+  _commit_version LONG,
+  _commit_timestamp TIMESTAMP
+) 
+LOCATION 'abfss://lake@lrndatasaeundgrf.dfs.core.windows.net/pubs/history';
 
 -- COMMAND ----------
 
-DROP TABLE IF EXISTS beer.pub.history;
-CREATE TABLE beer.pub.history (
-  pub STRING,
-  number_of_beers INT,
-  date_updated DATE
-) 
-LOCATION 'abfss://lake@lrndatasaeundgrf.dfs.core.windows.net/pubs/history';
+DESCRIBE HISTORY beer.pub.state;
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC change_data_stream1 = (spark.readStream.format("delta") \
+-- MAGIC                                     .option("startingVersion", "2") \
+-- MAGIC                                      .option("readChangeData", "true") \
+-- MAGIC                                      .table("beer.pub.state"))
+-- MAGIC
+-- MAGIC query = change_data_stream1.filter("_change_type in ('insert', 'update_postimage')").writeStream \
+-- MAGIC     .format("delta") \
+-- MAGIC     .outputMode("append") \
+-- MAGIC     .option("checkpointLocation", "abfss://lake@lrndatasaeundgrf.dfs.core.windows.net/pubs/history/checkpoint") \
+-- MAGIC     .trigger(availableNow=True) \
+-- MAGIC     .start("abfss://lake@lrndatasaeundgrf.dfs.core.windows.net/pubs/history")
+
+-- COMMAND ----------
+
+-- MAGIC %sql
+-- MAGIC SELECT * FROM beer.pub.history
