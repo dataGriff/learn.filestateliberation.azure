@@ -216,7 +216,7 @@ display(cloudEventsDF)
 
 # COMMAND ----------
 
-# DBTITLE 1,Hub Sorted - just add key when need to but should come from secrets
+# DBTITLE 1,Hub Sorted - just add key when need to but should come from secrets, make sure find right place for checkpoint...
 from pyspark.sql.types import StructType, StringType, StructField
 from pyspark.sql.functions import lit, expr, current_timestamp, col, struct, to_json
 
@@ -253,7 +253,7 @@ cloudEventsDF = toCloudEvents(change_data_stream1.filter("_change_type in ('inse
 
 ##display(cloudEventsDF)
 
-connectionString = "Endpoint=sb://lrn-datagriff-ehns-eun-dgrf.servicebus.windows.net/;SharedAccessKeyName=send;SharedAccessKey=;EntityPath=beer.cdc.pub.v3"
+connectionString = "Endpoint=sb://lrn-datagriff-ehns-eun-dgrf.servicebus.windows.net/;SharedAccessKeyName=send;SharedAccessKey={key here};EntityPath=beer.cdc.pub.v3"
 
 ehConf = {
     "eventhubs.connectionString": sc._jvm.org.apache.spark.eventhubs.EventHubsUtils.encrypt(connectionString)
@@ -264,7 +264,7 @@ query = (cloudEventsDF
     .writeStream 
     .format("eventhubs") 
     .options(**ehConf) 
-    .option("checkpointLocation", "abfss://lake@lrndatasaeundgrf.dfs.core.windows.net/pubs/ehv6/checkpoint") 
+    .option("checkpointLocation", "abfss://lake@lrndatasaeundgrf.dfs.core.windows.net/pubs/ehv6/checkpoint") ## checkpoint! where should this go to be isolated?
     .outputMode("append") 
     .trigger(availableNow=True)
     .start())
