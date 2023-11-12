@@ -172,15 +172,6 @@
 
 # COMMAND ----------
 
-
-
-# COMMAND ----------
-
-# MAGIC %pip install --upgrade pip
-# MAGIC
-
-# COMMAND ----------
-
 # MAGIC %md ## Event Hub
 
 # COMMAND ----------
