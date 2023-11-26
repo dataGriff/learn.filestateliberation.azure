@@ -112,7 +112,13 @@
 # MAGIC     deltaTable.alias("tgt").merge(
 # MAGIC         batchDF.alias("src"),
 # MAGIC         "tgt.pub = src.pub"
-# MAGIC     ).whenMatchedUpdateAll().whenNotMatchedInsertAll().execute()
+# MAGIC     ).whenMatchedUpdate(
+# MAGIC         condition="tgt.number_of_beers != src.number_of_beers",
+# MAGIC         set={
+# MAGIC             "number_of_beers": "src.number_of_beers",
+# MAGIC             "date_updated": "src.date_updated"
+# MAGIC         }
+# MAGIC     ).whenNotMatchedInsertAll().execute()
 # MAGIC
 # MAGIC # Apply the merge logic to each batch
 # MAGIC query = streamingDF.writeStream \
